@@ -82,27 +82,26 @@ async function connectDB() {
       res.send(result);
     });
 
+
     app.get("/bookings", async (req: Request, res: Response) => {
       try {
-        const data = resourceCollection.find();
-        const result = await data.toArray();
+        const { resource, date } = req.query;
+        const filter: any = {};
+        if (resource) {
+          filter.resource = { $regex: `${resource}$`, $options: "i" };
+        }
+        if (date) {
+          filter.date = date;
+        }
+        const result = await resourceCollection.find(filter).toArray();
         res.send(result);
       } catch (err) {
+        console.error(err);
         res.status(500).send("Error fetching bookings");
       }
     });
 
-    app.get("/resource/:data", async (req: Request, res: Response) => {
-      const data = req.params.data;
-      const result = await resourceCollection.find({ resource: data }).toArray();
-      res.send(result);
-    });
 
-    app.get("/date/:data", async (req: Request, res: Response) => {
-      const data = req.params.data;
-      const result = await resourceCollection.find({ date: data }).toArray();
-      res.send(result);
-    });
 
     app.delete("/booking-delete/:id", async (req: Request, res: Response) => {
       const id = req.params.id;
